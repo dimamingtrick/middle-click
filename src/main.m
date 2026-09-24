@@ -67,6 +67,22 @@ static CGEventRef tapEvent(CGEventTapProxy proxy, CGEventType type, CGEventRef e
 
 #pragma mark - App
 
+// Three fingertips on the trackpad, the middle finger a bit higher.
+static NSImage *menuBarIcon(void) {
+    NSImage *image = [NSImage imageWithSize:NSMakeSize(18, 18) flipped:NO drawingHandler:^BOOL(NSRect rect) {
+        CGFloat d = 4.6;
+        NSPoint tips[] = {{3, 8}, {9, 10.2}, {15, 8}};
+        [NSColor.blackColor set];
+        for (int i = 0; i < 3; i++) {
+            [[NSBezierPath bezierPathWithOvalInRect:NSMakeRect(tips[i].x - d / 2, tips[i].y - d / 2, d, d)] fill];
+        }
+        return YES;
+    }];
+    image.template = YES;
+    image.accessibilityDescription = @"MiddleClick";
+    return image;
+}
+
 @interface AppDelegate : NSObject <NSApplicationDelegate>
 - (void)scheduleTouchRestart;
 @end
@@ -122,7 +138,7 @@ static void displaysChanged(CGDirectDisplayID display, CGDisplayChangeSummaryFla
 
 - (void)setUpStatusItem {
     _statusItem = [NSStatusBar.systemStatusBar statusItemWithLength:NSSquareStatusItemLength];
-    _statusItem.button.image = [NSImage imageWithSystemSymbolName:@"computermouse" accessibilityDescription:@"MiddleClick"];
+    _statusItem.button.image = menuBarIcon();
     _statusItem.button.appearsDisabled = YES;
 
     NSMenu *menu = [NSMenu new];

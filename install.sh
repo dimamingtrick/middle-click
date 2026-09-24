@@ -102,7 +102,7 @@ EOF
         echo "error: $name did not start; see: launchctl print $domain/$id" >&2
         exit 1
     fi
-    echo "$name is running: look for the mouse icon in the menu bar."
+    echo "$name is running: look for the three-dot icon in the menu bar."
     echo "If the icon is dimmed, allow $name in System Settings → Privacy & Security → Accessibility."
 }
 
