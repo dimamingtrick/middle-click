@@ -1,0 +1,17 @@
+{
+  "name": "middle-click",
+  "version": "1.0.0",
+  "description": "Three-finger trackpad click as a middle click on macOS",
+  "private": true,
+  "repository": "github:dimamingtrick/middle-click",
+  "os": [
+    "darwin"
+  ],
+  "bin": {
+    "middle-click": "install.sh"
+  },
+  "files": [
+    "install.sh",
+    "dist/"
+  ]
+}
