@@ -32,7 +32,7 @@ From a clone, run `middle-click/install.sh uninstall`. Deleting the app by hand 
 
 ## How it works
 
-The private MultitouchSupport framework reports how many fingers touch the trackpad. An event tap turns a left click made with exactly three fingers into a middle click, including drags and the release. Touches on a Magic Mouse are ignored.
+The private MultitouchSupport framework reports how many fingers touch the trackpad. An event tap turns a click made with exactly three fingers into a middle click, including drags and the release. That includes the three-finger clicks macOS takes for two-finger (right) clicks, which it sometimes does, e.g. when the fingers stand in a triangle. Touches on a Magic Mouse are ignored.
 
 ## Build
 

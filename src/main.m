@@ -1,7 +1,7 @@
 // MiddleClick: a click with three fingers on the trackpad becomes a middle click.
 //
 // The private MultitouchSupport framework reports how many fingers touch the
-// trackpad; an event tap rewrites left-button events while three are down.
+// trackpad; an event tap rewrites clicks made while three are down.
 
 #import <Cocoa/Cocoa.h>
 #import <IOKit/IOKitLib.h>
@@ -46,7 +46,7 @@ static bool isMagicMouse(MTDeviceRef device) {
 
 static os_log_t logger;
 static _Atomic int fingerCount; // written on the multitouch thread
-static bool middleDown;          // main thread only
+static CGEventType middlePress;  // main thread only
 static CFMachPortRef eventTap;
 
 static int touchFrame(MTDeviceRef device, void *touches, int count, double timestamp, int frame) {
@@ -60,8 +60,10 @@ static CGEventRef tapEvent(CGEventTapProxy proxy, CGEventType type, CGEventRef e
         return event;
     }
     int fingers = atomic_load_explicit(&fingerCount, memory_order_relaxed);
-    if (type == kCGEventLeftMouseDown) os_log_debug(logger, "click with %d finger(s)", fingers);
-    convertClick(event, fingers, &middleDown);
+    if (type == kCGEventLeftMouseDown || type == kCGEventRightMouseDown) {
+        os_log_debug(logger, "%{public}s click with %d finger(s)", type == kCGEventLeftMouseDown ? "left" : "right", fingers);
+    }
+    convertClick(event, fingers, &middlePress);
     return event;
 }
 
@@ -175,8 +177,10 @@ static void displaysChanged(CGDirectDisplayID display, CGDisplayChangeSummaryFla
 }
 
 - (void)startEventTap {
+    // Right-button events too: macOS can report a three-finger click as a two-finger one.
     CGEventMask mask = CGEventMaskBit(kCGEventLeftMouseDown) | CGEventMaskBit(kCGEventLeftMouseDragged)
-                     | CGEventMaskBit(kCGEventLeftMouseUp);
+                     | CGEventMaskBit(kCGEventLeftMouseUp) | CGEventMaskBit(kCGEventRightMouseDown)
+                     | CGEventMaskBit(kCGEventRightMouseDragged) | CGEventMaskBit(kCGEventRightMouseUp);
     eventTap = CGEventTapCreate(kCGHIDEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault, mask, tapEvent, NULL);
     if (!eventTap) return; // access not in effect yet; the timer retries
     _tapSource = CFMachPortCreateRunLoopSource(NULL, eventTap, 0);
@@ -192,7 +196,7 @@ static void displaysChanged(CGDirectDisplayID display, CGDisplayChangeSummaryFla
     CFMachPortInvalidate(eventTap);
     CFRelease(eventTap);
     eventTap = NULL;
-    middleDown = false;
+    middlePress = kCGEventNull;
     os_log(logger, "event tap stopped: Accessibility access revoked");
 }
 
